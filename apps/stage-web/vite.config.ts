@@ -105,7 +105,7 @@ export default defineConfig({
         chunkFileNames: (chunkInfo) => {
           const containsAnalyticsModule = chunkInfo.moduleIds.some((moduleId) => {
             const normalizedModuleId = moduleId.replaceAll('\\', '/').toLowerCase()
-            return normalizedModuleId.includes('analytics') || normalizedModuleId.includes('openpanel')
+            return normalizedModuleId.includes('analytics') || normalizedModuleId.includes('posthog')
           })
 
           // Only analytics/provider chunks receive the manual neutral mapping;

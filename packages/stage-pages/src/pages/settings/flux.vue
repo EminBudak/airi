@@ -326,7 +326,7 @@ onMounted(() => {
 })
 
 async function handleBuy(stripePriceId: string) {
-  // OpenPanel funnel step 2: user picked a plan. price_minor_unit lives on
+  // PostHog funnel step 2: user picked a plan. price_minor_unit lives on
   // the Stripe webhook (server-side `payment_completed`); we deliberately
   // don't send a formatted-string price from the SPA so funnels don't get
   // poisoned by currency-formatting drift.
@@ -360,8 +360,8 @@ async function handleBuy(stripePriceId: string) {
     }
     const data = await res.json()
     if (data.url) {
-      // Start capture before redirecting to Stripe so fetch keepalive can
-      // finish delivery after the page unloads.
+      // Capture before redirecting to Stripe. The adapter sends this event with
+      // sendBeacon, so delivery can finish after the page unloads.
       trackCheckoutStarted(stripePriceId, {
         currency: selectedCurrency.value,
         entry_surface: 'settings_flux',

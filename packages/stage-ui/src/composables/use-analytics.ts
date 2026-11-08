@@ -159,7 +159,7 @@ export function useAnalytics() {
    *
    * Expects:
    * - `entry_surface` is a stable identifier — don't rename without coordinating
-   *   OpenPanel funnel definitions in `docs/ai-context/metrics-ownership.md`.
+   *   PostHog funnel definitions in `docs/ai-context/metrics-ownership.md`.
    */
   function trackPricingViewed(entrySurface: string, planPeriod?: 'monthly' | 'annual' | 'one_time') {
     if (!canCapture())
@@ -187,7 +187,7 @@ export function useAnalytics() {
    *   `window.location.href = ...`. `beforeNavigation` lets the installed
    *   adapter choose a delivery mechanism that survives document unload.
    *
-   * The funnel terminator `payment_completed` is forwarded to OpenPanel
+   * The funnel terminator `payment_completed` is forwarded to PostHog
    * server-side by the product-events service, keyed by the Better Auth
    * user id.
    */
@@ -233,7 +233,7 @@ export function useAnalytics() {
   }
 
   // ─── Account lifecycle (same event names as apps/ui-server-auth's
-  // analytics module — both surfaces feed one OpenPanel series) ───────────
+  // analytics module — both surfaces feed one PostHog series) ───────────
 
   function trackPasswordChanged() {
     if (!canCapture())
@@ -311,7 +311,7 @@ export function useAnalytics() {
     captureAnalyticsEvent('character_created', properties)
   }
 
-  /** Feature adoption — voice mode is a candidate retention lever; cohort comparisons live in OpenPanel. */
+  /** Feature adoption — voice mode is a candidate retention lever; cohort comparisons live in PostHog. */
   function trackVoiceModeActivated(characterId?: string) {
     if (!canCapture())
       return
@@ -339,7 +339,7 @@ export function useAnalytics() {
   /**
    * Retention cohort denominator — every chat session start. Pair with
    * `payment_completed` cohort to compute "active paying user" retention
-   * curves in OpenPanel.
+   * curves in PostHog.
    */
   function trackChatSessionStarted(modelId: string, sessionIndex?: number) {
     if (!canCapture())

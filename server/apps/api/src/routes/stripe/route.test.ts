@@ -206,8 +206,8 @@ describe('stripeRoutes', () => {
             metadata: {
               payment_order_id: 'po_1',
               stripePriceId: 'price_starter',
-              openpanelDeviceId: 'anon-browser-1',
-              openpanelSessionId: 'ph-session-1',
+              posthogDistinctId: 'anon-browser-1',
+              posthogSessionId: 'ph-session-1',
             },
           },
         },
@@ -238,7 +238,7 @@ describe('stripeRoutes', () => {
       expect(productEventService.track).toHaveBeenCalledWith(expect.objectContaining({
         action: 'payment_completed',
         metadata: expect.objectContaining({
-          openpanel_device_id: 'anon-browser-1',
+          posthog_distinct_id: 'anon-browser-1',
           stripe_price_id: 'price_starter',
         }),
       }))

@@ -211,7 +211,7 @@ describe('stripe checkout', () => {
     expect(order?.processorOrderId).toBe('cs_test_race')
   })
 
-  it('stores browser OpenPanel identity in Checkout Session metadata', async () => {
+  it('stores browser PostHog identity in Checkout Session metadata', async () => {
     const create = vi.fn(async () => ({
       id: 'cs_test_ph',
       url: 'https://checkout.stripe.test/cs_test_ph',
@@ -227,22 +227,22 @@ describe('stripe checkout', () => {
       { stripePriceId: 'price_starter' },
       new Request('http://localhost/api/v1/stripe/checkout', {
         headers: {
-          'x-openpanel-device-id': 'anon-browser-1',
-          'x-openpanel-session-id': 'ph-session-1',
+          'x-posthog-distinct-id': 'anon-browser-1',
+          'x-posthog-session-id': 'ph-session-1',
         },
       }),
     )
 
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
       metadata: expect.objectContaining({
-        openpanelDeviceId: 'anon-browser-1',
-        openpanelSessionId: 'ph-session-1',
+        posthogDistinctId: 'anon-browser-1',
+        posthogSessionId: 'ph-session-1',
       }),
     }))
     expect(productEventService.track).toHaveBeenCalledWith(expect.objectContaining({
       action: 'checkout_started',
       metadata: expect.objectContaining({
-        openpanel_device_id: 'anon-browser-1',
+        posthog_distinct_id: 'anon-browser-1',
         stripe_price_id: 'price_starter',
       }),
     }))

@@ -77,7 +77,7 @@ import { accountEventsStream, createUserDeletedEventHandler } from './services/a
 import { createConfigKVService } from './services/adapters/config-kv'
 import { createConfigKVStore } from './services/adapters/config-kv/store'
 import { createS3ObjectStore } from './services/adapters/object-store'
-import { createOpenpanelSink } from './services/adapters/openpanel'
+import { createPosthogSink } from './services/adapters/posthog'
 import { createRevenuecatSubscriberClient } from './services/adapters/revenuecat-subscriber'
 import { createRevenuecatSubscriptionSync } from './services/adapters/revenuecat-subscriptions'
 import { createBillingService } from './services/domain/billing/billing-service'
@@ -612,21 +612,21 @@ export async function createApp() {
     build: ({ dependsOn }) => createConfigKVService(createConfigKVStore(dependsOn.db, dependsOn.redis)),
   })
 
-  const openpanelSink = injeca.provide('services:openpanelSink', {
+  const posthogSink = injeca.provide('services:posthogSink', {
     dependsOn: { env: parsedEnv },
-    build: ({ dependsOn }) => {
-      const { OPENPANEL_API_URL: apiUrl, OPENPANEL_CLIENT_ID: clientId, OPENPANEL_CLIENT_SECRET: clientSecret } = dependsOn.env
-      if (!apiUrl && !clientId && !clientSecret)
+    build: ({ dependsOn, on }) => {
+      const { POSTHOG_API_HOST: host, POSTHOG_PROJECT_KEY: projectKey } = dependsOn.env
+      if (!projectKey)
         return null
-      if (!apiUrl || !clientId || !clientSecret)
-        throw new Error('OpenPanel requires API URL, client id, and client secret')
-      return createOpenpanelSink({ apiUrl, clientId, clientSecret })
+      const sink = createPosthogSink({ projectKey, host })
+      on('stop', () => sink.shutdown())
+      return sink
     },
   })
 
   const productEventService = injeca.provide('services:productEvents', {
-    dependsOn: { openpanelSink },
-    build: ({ dependsOn }) => createProductEventService(dependsOn.openpanelSink),
+    dependsOn: { posthogSink },
+    build: ({ dependsOn }) => createProductEventService(dependsOn.posthogSink),
   })
 
   const characterService = injeca.provide('services:characters', {

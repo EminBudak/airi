@@ -135,9 +135,9 @@ const EnvSchema = intersect([S3EnvironmentSchema, object({
 
   OTEL_TRACES_SAMPLING_RATIO: optionalNumberFromString(1, 'OTEL_TRACES_SAMPLING_RATIO', 0, 1),
   PORT: optionalIntegerFromString(3000, 'PORT', 1),
-  OPENPANEL_API_URL: optional(string()),
-  OPENPANEL_CLIENT_ID: optional(string()),
-  OPENPANEL_CLIENT_SECRET: optional(string()),
+  POSTHOG_API_HOST: optional(string(), 'https://t.airi.build'),
+  // Server product events. Absent disables forwarding.
+  POSTHOG_PROJECT_KEY: optional(string()),
   REDIS_URL: pipe(string(), nonEmpty('REDIS_URL is required')),
   STRIPE_SECRET_KEY: optional(string()),
 

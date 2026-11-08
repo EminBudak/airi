@@ -50,8 +50,8 @@ import '@fontsource/maple-mono/index.css'
 import '@fontsource-variable/nunito/index.css'
 
 configureAnalyticsAdapter(async (options) => {
-  const { createOpenpanelAdapter } = await import('@proj-airi/stage-ui/libs/product-signals/openpanel')
-  return createOpenpanelAdapter(options)
+  const { createPosthogAdapter } = await import('@proj-airi/stage-ui/libs/product-signals/posthog')
+  return createPosthogAdapter(options)
 })
 registerAuthorizationHandler(browserAuthorizationHandler)
 

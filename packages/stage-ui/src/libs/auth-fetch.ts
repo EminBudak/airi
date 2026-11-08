@@ -32,11 +32,11 @@ export async function authedFetch(
     const headers = new Headers(init?.headers ?? request?.headers)
     if (token)
       headers.set('Authorization', `Bearer ${token}`)
-    const openpanelIdentity = shouldAttachOpenpanelIdentity(input) ? getAnalyticsIdentitySnapshot() : null
-    if (openpanelIdentity) {
-      headers.set('x-openpanel-device-id', openpanelIdentity.distinctId)
-      if (openpanelIdentity.sessionId)
-        headers.set('x-openpanel-session-id', openpanelIdentity.sessionId)
+    const posthogIdentity = shouldAttachPosthogIdentity(input) ? getAnalyticsIdentitySnapshot() : null
+    if (posthogIdentity) {
+      headers.set('x-posthog-distinct-id', posthogIdentity.distinctId)
+      if (posthogIdentity.sessionId)
+        headers.set('x-posthog-session-id', posthogIdentity.sessionId)
     }
     return fetch(request ? request.clone() : input, { ...init, headers, credentials: 'omit' })
   }
@@ -68,7 +68,7 @@ export async function authedFetch(
   return retried
 }
 
-function shouldAttachOpenpanelIdentity(input: RequestInfo | URL): boolean {
+function shouldAttachPosthogIdentity(input: RequestInfo | URL): boolean {
   const url = typeof input === 'string'
     ? input
     : input instanceof URL ? input.toString() : input.url

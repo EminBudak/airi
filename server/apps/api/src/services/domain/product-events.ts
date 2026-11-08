@@ -1,4 +1,4 @@
-import type { ProductAnalyticsSink } from '../adapters/openpanel'
+import type { ProductAnalyticsSink } from '../adapters/posthog'
 
 import { useLogger } from '@guiiai/logg'
 
@@ -6,10 +6,6 @@ const logger = useLogger('product-events')
 
 const RESERVED_PRODUCT_METADATA_KEYS = new Set([
   'event_id',
-  '__deviceId',
-  '__identify',
-  'profileId',
-  '$session_id',
   'airi_user_id',
   'app_surface',
   'feature',
@@ -28,7 +24,7 @@ export type ProductAction
     | 'checkout_started'
     | 'payment_completed'
 
-/** Product funnel fact forwarded to OpenPanel from the server. */
+/** Product funnel fact forwarded to PostHog from the server. */
 export interface ProductEventInput {
   /** Authenticated user id used for product attribution. Never emitted as a Prometheus label. */
   userId: string
@@ -66,11 +62,12 @@ function stringMetadata(input: ProductEventInput, key: string): string | undefin
 }
 
 function hasReservedMetadataKey(metadata: ProductEventMetadata | undefined): boolean {
-  return metadata != null && Object.keys(metadata).some(key => RESERVED_PRODUCT_METADATA_KEYS.has(key))
+  // PostHog reserves every `$` key, for example `$anon_distinct_id` and `$session_id`.
+  return metadata != null && Object.keys(metadata).some(key => key.startsWith('$') || RESERVED_PRODUCT_METADATA_KEYS.has(key))
 }
 
 /**
- * Sends confirmed product facts to OpenPanel.
+ * Sends confirmed product facts to PostHog.
  *
  * Use when:
  * - A server has an authenticated user id and confirms a funnel fact.
@@ -94,12 +91,15 @@ export function createProductEventService(sink?: ProductAnalyticsSink | null) {
         return
       }
 
-      const deviceId = stringMetadata(input, 'openpanel_device_id')
+      const deviceId = stringMetadata(input, 'posthog_distinct_id')
+      const sessionId = stringMetadata(input, 'posthog_session_id')
 
       try {
         await sink.capture({
           userId: input.userId,
           ...(deviceId && { deviceId }),
+          ...(sessionId && { sessionId }),
+          ...(input.eventId && { eventId: input.eventId }),
           event: forwardedEvent,
           properties: {
             ...input.metadata,
@@ -113,7 +113,7 @@ export function createProductEventService(sink?: ProductAnalyticsSink | null) {
         })
       }
       catch (err) {
-        logger.withError(err).withFields({ action: input.action }).warn('OpenPanel product analytics capture failed')
+        logger.withError(err).withFields({ action: input.action }).warn('PostHog product analytics capture failed')
       }
     },
   }
